@@ -21,6 +21,11 @@ export const Constants = {
     TICK_RATE_MS: 500, // TODO: tune once movement/speed-up is implemented
 } as const;
 
+export const ElementIds = {
+    DIGIT_BANK_GROUP: "digit-bank-group",
+    TARGETS_GROUP: "targets-group",
+} as const;
+
 /** ---------- Core domain types ---------- */
 
 /**

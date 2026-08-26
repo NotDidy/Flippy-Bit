@@ -2,6 +2,7 @@
     background-color: rgb(161, 161, 161);
     padding: 2em;
     padding-top: 4em;
+    --fb-digit-idle-color: #1E90FF;
 }
 
 body,
@@ -98,4 +99,9 @@ svg rect {
     font-size: 1.5em;
     font-weight: bolder;
     text-align: center;
+}
+
+.digit-box {
+  fill: var(--fb-digit-idle-color);
+  stroke: #000000;
 }

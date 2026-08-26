@@ -31,8 +31,9 @@ export const reduceState = (s: State, a: Action): State => {
         case "FlipDigit":
             return { ...s, digitBank: flipDigit(s.digitBank, a.index) };
         case "Tick":
-            throw new Error("TODO: implement Tick case");
+            return s;
         case "SpawnTarget":
             throw new Error("TODO: implement SpawnTarget case");
     }
 };
+
