@@ -1,3 +1,4 @@
+import { Bit } from "./types";
 /**
  * Small, generic, reusable helper functions.
  */
@@ -24,4 +25,7 @@ export const updateAt = <T>(
 export const clamp = (value: number, min: number, max: number): number => {
     return Math.min(Math.max(value, min), max);
 };
+
+export const bitsToNumber = (bits: ReadonlyArray<Bit>): number =>
+    bits.reduce<number>((acc, bit) => acc * 2 + bit, 0);
 

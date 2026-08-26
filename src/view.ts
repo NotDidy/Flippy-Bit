@@ -5,7 +5,7 @@
  * decide game logic — it should only take a State and draw it.
  */
 
-import { Constants, State, Viewport, ElementIds } from "./types";
+import { Constants, State, Target, Viewport, ElementIds } from "./types";
 
 /**
  * Brings an SVG element to the foreground.
@@ -130,7 +130,37 @@ const renderTargets = (svg: SVGSVGElement, s: State): void => {
     const group = createSvgElement(svg.namespaceURI, "g", {
         id: ElementIds.TARGETS_GROUP,
     });
-    // TODO: draw each target in s.allCurrentTargetsInPlay
+
+    s.allCurrentTargetsInPlay.forEach((target) => {
+        // x isn't part of the state model yet (only y moves), so centre
+        // every target horizontally on the canvas for now — revisit if
+        // targets ever need distinct lanes/columns.
+        const x = (Viewport.CANVAS_WIDTH - Target.WIDTH) / 2;
+        const y = target.y;
+
+        const box = createSvgElement(svg.namespaceURI, "rect", {
+            x: String(x),
+            y: String(y),
+            width: String(Target.WIDTH),
+            height: String(Target.HEIGHT),
+            "data-fb-target-id": String(target.id),
+            class: "target-box",
+        });
+
+        const hexText = createSvgElement(svg.namespaceURI, "text", {
+            x: String(x + Target.WIDTH / 2),
+            y: String(y + Target.HEIGHT / 2),
+            "text-anchor": "middle",
+            "dominant-baseline": "central",
+            "data-fb-target-id": String(target.id),
+            class: "target-text",
+        });
+        hexText.textContent = target.hexValue.toString(16).toUpperCase();
+
+        group.appendChild(box);
+        group.appendChild(hexText);
+    });
+
     svg.appendChild(group);
 };
 
