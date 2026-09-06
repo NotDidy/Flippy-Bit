@@ -168,6 +168,28 @@ const renderTargets = (svg: SVGSVGElement, s: State): void => {
  * renderScore, renderHealthReserve, renderGameOverOverlay.
  */
 
+const renderScore = (svg: SVGSVGElement, s: State): void => {
+    const existingGroup = svg.querySelector(`#${ElementIds.SCORE_GROUP}`);
+    if (existingGroup) {
+        svg.removeChild(existingGroup);
+    }
+
+    const group = createSvgElement(svg.namespaceURI, "g", {
+        id: ElementIds.SCORE_GROUP,
+    });
+
+    const scoreText = createSvgElement(svg.namespaceURI, "text", {
+        x: "16",
+        y: "24",
+        "text-anchor": "start",
+        class: "score-text",
+    });
+    scoreText.textContent = `Score: ${s.score}`;
+
+    group.appendChild(scoreText);
+    svg.appendChild(group);
+};
+
 /**
  * Sets up the SVG canvas and returns the render function used to draw
  * each new State as it arrives from the state stream.
@@ -194,5 +216,6 @@ export const render = (): ((s: State) => void) => {
         // then call renderDigitBank, renderTargets, etc.
         renderDigitBank(svg, s);
         renderTargets(svg, s);
+        renderScore(svg, s);
     };
 };

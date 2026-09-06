@@ -24,6 +24,7 @@ export const Constants = {
 export const ElementIds = {
     DIGIT_BANK_GROUP: "digit-bank-group",
     TARGETS_GROUP: "targets-group",
+    SCORE_GROUP: "fb-score-group",
 } as const;
 
 /** ---------- Core domain types ---------- */
