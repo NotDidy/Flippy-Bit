@@ -3,6 +3,8 @@
     padding: 2em;
     padding-top: 4em;
     --fb-digit-idle-color: #1E90FF;
+    --fb-target-color: #FF4500;
+    --fb-target-text-color: #FFFFFF;
 }
 
 body,
@@ -104,4 +106,14 @@ svg rect {
 .digit-box {
   fill: var(--fb-digit-idle-color);
   stroke: #000000;
+}
+
+.target-box {
+    fill: var(--fb-target-color);
+    stroke: #000000;
+}
+
+.target-text {
+    fill: var(--fb-target-text-color);
+    font-family: monospace;
 }

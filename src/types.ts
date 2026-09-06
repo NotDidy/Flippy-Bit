@@ -12,8 +12,8 @@ export const Viewport = {
 } as const;
 
 export const Target = {
-    WIDTH: 64,
-    HEIGHT: 36,
+    WIDTH: 32,
+    HEIGHT: 16,
 } as const;
 
 export const Constants = {

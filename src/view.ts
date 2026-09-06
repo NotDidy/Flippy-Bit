@@ -69,7 +69,6 @@ const DIGIT_ROW_Y = Viewport.CANVAS_HEIGHT - DIGIT_BOX_SIZE - 16; // near the bo
 
 const DIGIT_BANK_GROUP_ID = "fb-digit-bank-group";
 
-
 const renderDigitBank = (svg: SVGSVGElement, s: State): void => {
     const existingGroup = svg.querySelector(`#${DIGIT_BANK_GROUP_ID}`);
     if (existingGroup) {
@@ -131,7 +130,7 @@ const renderTargets = (svg: SVGSVGElement, s: State): void => {
         id: ElementIds.TARGETS_GROUP,
     });
 
-    s.allCurrentTargetsInPlay.forEach((target) => {
+    s.allCurrentTargetsInPlay.forEach(target => {
         // x isn't part of the state model yet (only y moves), so centre
         // every target horizontally on the canvas for now — revisit if
         // targets ever need distinct lanes/columns.

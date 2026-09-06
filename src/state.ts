@@ -21,7 +21,7 @@ export const initialState: State = {
 
 const moveTargetsDown = (
     targets: ReadonlyArray<FallingTargetView>,
-): ReadonlyArray<FallingTargetView> => targets.map(t => ({ ...t, y: t.y + 5 })); // TODO: tune speed, or pass a delta
+): ReadonlyArray<FallingTargetView> => targets.map(t => ({ ...t, y: t.y + 6 })); // TODO: tune speed, or pass a delta
 
 const CHECK_LINE_Y = 300; // TODO: move to Constants in types.ts
 
