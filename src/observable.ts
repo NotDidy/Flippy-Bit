@@ -22,10 +22,25 @@ export const flipKey$: Observable<Action> = fromEvent<KeyboardEvent>(
 /**
  * Emits a FlipDigit action whenever the player clicks a digit element
  * on screen.
- *
- * TODO: implement once view.ts renders the digit row with data hooks.
  */
-export const flipClick$: Observable<Action> | null = null; // placeholder
+export const flipClick$: Observable<Action> = fromEvent<MouseEvent>(
+    document.querySelector("#svgCanvas") as SVGSVGElement,
+    "click",
+).pipe(
+    filter(event =>
+        (event.target as SVGElement).hasAttribute("data-fb-digit-index"),
+    ),
+    map(
+        (event): Action => ({
+            kind: "FlipDigit",
+            index: Number(
+                (event.target as SVGElement).getAttribute(
+                    "data-fb-digit-index",
+                ),
+            ),
+        }),
+    ),
+);
 
 /**
  * Drives the game loop. Emits a Tick action at a regular interval.
@@ -65,4 +80,9 @@ export const spawn$: Observable<Action> = new Observable(subscriber => {
  *
  * TODO: merge in flipClick$ once implemented.
  */
-export const action$: Observable<Action> = merge(flipKey$, tick$, spawn$);
+export const action$: Observable<Action> = merge(
+    flipKey$,
+    flipClick$,
+    tick$,
+    spawn$,
+);
