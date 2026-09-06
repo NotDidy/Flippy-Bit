@@ -4,8 +4,6 @@
  * only type/constant declarations.
  */
 
-// men with hats
-
 export const Viewport = {
     CANVAS_WIDTH: 600,
     CANVAS_HEIGHT: 400,
