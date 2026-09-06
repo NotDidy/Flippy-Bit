@@ -1,4 +1,3 @@
-
 import { Observable, fromEvent, interval, map, merge } from "rxjs";
 import { filter } from "rxjs/operators";
 import { Action, Constants } from "./types";
@@ -11,11 +10,13 @@ export const flipKey$: Observable<Action> = fromEvent<KeyboardEvent>(
     document,
     "keydown",
 ).pipe(
-    filter((event) => event.key >= "1" && event.key <= "8"),
-    map((event): Action => ({
-        kind: "FlipDigit",
-        index: Number(event.key) - 1,
-    })),
+    filter(event => event.key >= "1" && event.key <= "8"),
+    map(
+        (event): Action => ({
+            kind: "FlipDigit",
+            index: Number(event.key) - 1,
+        }),
+    ),
 );
 
 /**
@@ -38,8 +39,24 @@ export const tick$: Observable<Action> = interval(Constants.TICK_RATE_MS).pipe(
  * Emits a SpawnTarget action at a random interval between 1-3 seconds, each with a fresh id and random hex value.
  *
  */
-export const spawn$: Observable<Action> = new Observable((subscriber) => {
-    // TODO: implement random-interval spawning
+export const spawn$: Observable<Action> = new Observable(subscriber => {
+    let timeoutId: ReturnType<typeof setTimeout>;
+
+    const scheduleNext = () => {
+        const delayMs = 1000 + Math.random() * 2000; // random delay in [1000, 3000)
+
+        timeoutId = setTimeout(() => {
+            subscriber.next({
+                kind: "SpawnTarget",
+                hexValue: Math.floor(Math.random() * 256), // 0–255, matches an 8-bit digit bank
+            });
+            scheduleNext();
+        }, delayMs);
+    };
+
+    scheduleNext();
+
+    return () => clearTimeout(timeoutId);
 });
 
 /**

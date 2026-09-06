@@ -16,7 +16,7 @@ export const initialState: State = {
     healthReserve: 3, //
     score: 0,
     gameEnd: false,
-    nextTargetId: 2,
+    nextTargetId: 0,
 };
 
 const moveTargetsDown = (
@@ -79,6 +79,13 @@ export const reduceState = (s: State, a: Action): State => {
             return { ...s, gameEnd: true };
         }
         case "SpawnTarget":
-            throw new Error("TODO: implement SpawnTarget case");
+            return {
+                ...s,
+                nextTargetId: s.nextTargetId + 1,
+                allCurrentTargetsInPlay: [
+                    ...s.allCurrentTargetsInPlay,
+                    { id: s.nextTargetId, hexValue: a.hexValue, y: 0 },
+                ],
+            };
     }
 };

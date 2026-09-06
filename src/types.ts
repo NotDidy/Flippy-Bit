@@ -64,7 +64,6 @@ export type Tick = Readonly<{
 
 export type SpawnTarget = Readonly<{
     kind: "SpawnTarget";
-    id: number;
     hexValue: number;
 }>;
 
