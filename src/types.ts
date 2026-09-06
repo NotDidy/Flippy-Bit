@@ -52,6 +52,7 @@ export type State = Readonly<{
     score: number;
     gameEnd: boolean;
     nextTargetId: number;
+    elapsedMs: number;
 }>;
 
 export type FlipDigit = Readonly<{

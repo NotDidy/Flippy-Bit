@@ -17,11 +17,32 @@ export const initialState: State = {
     score: 0,
     gameEnd: false,
     nextTargetId: 0,
+    elapsedMs: 0,
+};
+
+const BASE_FALL_SPEED = 6; // px/tick at game start — matches the original hardcoded value
+const MAX_FALL_SPEED = 18; // hard cap so late-game isn't literally unplayable
+const SPEED_INCREMENT_PER_INTERVAL = 3; // px/tick gained per SPEED_INTERVAL_MS survived
+const SPEED_INTERVAL_MS = 10_000; // how often the speed bumps up
+
+/**
+ * Fall speed (px/tick), increasing in steps every SPEED_INTERVAL_MS of
+ * survival, capped at MAX_FALL_SPEED. Pure function of elapsed time so
+ * it's trivially testable and reusable, independent of when/how often
+ * Tick actually fires.
+ */
+const speedForElapsed = (elapsedMs: number): number => {
+    const stepsElapsed = Math.floor(elapsedMs / SPEED_INTERVAL_MS);
+    const rawSpeed =
+        BASE_FALL_SPEED + stepsElapsed * SPEED_INCREMENT_PER_INTERVAL;
+    return Math.min(rawSpeed, MAX_FALL_SPEED);
 };
 
 const moveTargetsDown = (
     targets: ReadonlyArray<FallingTargetView>,
-): ReadonlyArray<FallingTargetView> => targets.map(t => ({ ...t, y: t.y + 6 })); // TODO: tune speed, or pass a delta
+    fallSpeed: number,
+): ReadonlyArray<FallingTargetView> =>
+    targets.map(t => ({ ...t, y: t.y + fallSpeed }));
 
 const CHECK_LINE_Y = 300; // TODO: move to Constants in types.ts
 
@@ -43,15 +64,16 @@ export const reduceState = (s: State, a: Action): State => {
             return { ...s, digitBank: flipDigit(s.digitBank, a.index) };
         case "Tick": {
             if (s.gameEnd) {
-                return s; // ignore all further actions once the game has ended
+                return s;
             }
 
-            const movedTargets = moveTargetsDown(s.allCurrentTargetsInPlay);
+            const elapsedMs = s.elapsedMs + Constants.TICK_RATE_MS;
+            const fallSpeed = speedForElapsed(elapsedMs);
+            const movedTargets = moveTargetsDown(
+                s.allCurrentTargetsInPlay,
+                fallSpeed,
+            );
 
-            // "Lowest" = furthest down = largest y, regardless of array order.
-            // Explicit rather than relying on insertion order, since that
-            // invariant would silently break if targets are ever filtered,
-            // reordered, or spawned out of sequence elsewhere.
             const lowestTarget =
                 movedTargets.length === 0
                     ? undefined
@@ -60,11 +82,19 @@ export const reduceState = (s: State, a: Action): State => {
                       );
 
             if (lowestTarget === undefined) {
-                return { ...s, allCurrentTargetsInPlay: movedTargets };
+                return {
+                    ...s,
+                    elapsedMs,
+                    allCurrentTargetsInPlay: movedTargets,
+                };
             }
 
             if (lowestTarget.y < CHECK_LINE_Y) {
-                return { ...s, allCurrentTargetsInPlay: movedTargets };
+                return {
+                    ...s,
+                    elapsedMs,
+                    allCurrentTargetsInPlay: movedTargets,
+                };
             }
 
             const isCorrect =
@@ -73,6 +103,7 @@ export const reduceState = (s: State, a: Action): State => {
             if (isCorrect) {
                 return {
                     ...s,
+                    elapsedMs,
                     score: s.score + 1,
                     allCurrentTargetsInPlay: movedTargets.filter(
                         t => t.id !== lowestTarget.id,
@@ -80,7 +111,7 @@ export const reduceState = (s: State, a: Action): State => {
                 };
             }
 
-            return { ...s, gameEnd: true };
+            return { ...s, elapsedMs, gameEnd: true };
         }
         case "SpawnTarget":
             if (s.gameEnd) {
