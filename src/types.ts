@@ -40,7 +40,7 @@ export type DigitBank = Readonly<{
 
 export type FallingTargetView = Readonly<{
     id: number;
-    hexValue: number;
+    targetValue: number;
     y: number;
 }>;
 
@@ -52,6 +52,7 @@ export type State = Readonly<{
     gameEnd: boolean;
     nextTargetId: number;
     elapsedMs: number;
+    displayBase: number;
 }>;
 
 export type FlipDigit = Readonly<{
@@ -66,11 +67,16 @@ export type Tick = Readonly<{
 
 export type SpawnTarget = Readonly<{
     kind: "SpawnTarget";
-    hexValue: number;
+    targetValue: number;
+}>;
+
+export type SetBase = Readonly<{
+    kind: "SetBase";
+    base: number;
 }>;
 
 export type Restart = Readonly<{
     kind: "Restart";
 }>;
 
-export type Action = FlipDigit | Tick | SpawnTarget | Restart;
+export type Action = FlipDigit | Tick | SpawnTarget | Restart | SetBase;

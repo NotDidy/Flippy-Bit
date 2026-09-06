@@ -128,6 +128,8 @@ type TargetElements = { box: SVGElement; text: SVGElement };
  * in place, since it needs to persist across calls to know what already
  * exists in the DOM.
  */
+const TARGET_PADDING_X = 12; // horizontal breathing room between text and box edge
+
 const renderTargets = (
     svg: SVGSVGElement,
     s: State,
@@ -145,9 +147,6 @@ const renderTargets = (
 
     const currentIds = new Set(s.allCurrentTargetsInPlay.map(t => t.id));
 
-    // Remove elements for targets that no longer exist (caught, or
-    // otherwise cleared) — anything in the map that isn't in this
-    // frame's state.
     elementsById.forEach((elements, id) => {
         if (!currentIds.has(id)) {
             group!.removeChild(elements.box);
@@ -156,21 +155,39 @@ const renderTargets = (
         }
     });
 
+    const centerX = Viewport.CANVAS_WIDTH / 2;
+
+    // Sizes the box around whatever text is currently in `text`, using
+    // its real rendered width (getBBox) rather than guessing a
+    // character-width constant — this is what makes the box correctly
+    // fit "11111111" (base 2) just as well as "FF" (base 16).
+    const fitBoxToText = (box: SVGElement, text: SVGElement, y: number) => {
+        const bbox = (text as unknown as SVGTextElement).getBBox();
+        const width = Math.max(Target.WIDTH, bbox.width + TARGET_PADDING_X * 2);
+        const x = centerX - width / 2;
+
+        box.setAttribute("x", String(x));
+        box.setAttribute("width", String(width));
+        box.setAttribute("y", String(y));
+        text.setAttribute("x", String(centerX));
+        text.setAttribute("y", String(y + Target.HEIGHT / 2));
+    };
+
     s.allCurrentTargetsInPlay.forEach(target => {
-        const x = (Viewport.CANVAS_WIDTH - Target.WIDTH) / 2;
         const y = target.y;
         const existing = elementsById.get(target.id);
+        const displayText = target.targetValue
+            .toString(s.displayBase)
+            .toUpperCase();
 
         if (existing) {
-            // Already on screen — just move it, don't recreate it.
-            existing.box.setAttribute("y", String(y));
-            existing.text.setAttribute("y", String(y + Target.HEIGHT / 2));
+            existing.text.textContent = displayText;
+            fitBoxToText(existing.box, existing.text, y); // re-measure every frame — width may need to change if displayBase changed since last render
             return;
         }
 
-        // New target — create once, then track it for future frames.
         const box = createSvgElement(svg.namespaceURI, "rect", {
-            x: String(x),
+            x: "0",
             y: String(y),
             width: String(Target.WIDTH),
             height: String(Target.HEIGHT),
@@ -179,17 +196,20 @@ const renderTargets = (
         });
 
         const text = createSvgElement(svg.namespaceURI, "text", {
-            x: String(x + Target.WIDTH / 2),
+            x: String(centerX),
             y: String(y + Target.HEIGHT / 2),
             "text-anchor": "middle",
             "dominant-baseline": "central",
             "data-fb-target-id": String(target.id),
             class: "target-text",
         });
-        text.textContent = target.hexValue.toString(16).toUpperCase();
+        text.textContent = displayText;
 
         group!.appendChild(box);
-        group!.appendChild(text);
+        group!.appendChild(text); // must be appended before getBBox() — an unattached element has no layout to measure
+
+        fitBoxToText(box, text, y);
+
         elementsById.set(target.id, { box, text });
     });
 };
@@ -261,6 +281,13 @@ const renderGameOver = (svg: SVGSVGElement, s: State): void => {
     svg.appendChild(group);
 };
 
+const renderBaseValueText = (s: State): void => {
+    const baseValueText = document.querySelector("#baseValueText");
+    if (baseValueText) {
+        baseValueText.textContent = String(s.displayBase);
+    }
+};
+
 /**
  * Sets up the SVG canvas and returns the render function used to draw
  * each new State as it arrives from the state stream.
@@ -295,6 +322,7 @@ export const render = (): ((s: State) => void) => {
             targetElementsById.clear();
         }
 
+        renderBaseValueText(s);
         renderGameOver(svg, s);
     };
 };

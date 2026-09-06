@@ -18,6 +18,7 @@ export const initialState: State = {
     gameEnd: false,
     nextTargetId: 0,
     elapsedMs: 0,
+    displayBase: 16,
 };
 
 const BASE_FALL_SPEED = 0.5; // px/tick at game start — matches the original hardcoded value
@@ -60,6 +61,9 @@ export const flipDigit = (bank: DigitBank, index: number): DigitBank => ({
 export const reduceState = (s: State, a: Action): State => {
     switch (a.kind) {
         case "FlipDigit":
+            if (s.gameEnd) {
+                return s; // ignore digit flips once the game is over
+            }
             return { ...s, digitBank: flipDigit(s.digitBank, a.index) };
         case "Tick": {
             if (s.gameEnd) {
@@ -97,7 +101,7 @@ export const reduceState = (s: State, a: Action): State => {
             }
 
             const isCorrect =
-                bitsToNumber(s.digitBank.bits) === lowestTarget.hexValue;
+                bitsToNumber(s.digitBank.bits) === lowestTarget.targetValue;
 
             if (isCorrect) {
                 return {
@@ -121,10 +125,13 @@ export const reduceState = (s: State, a: Action): State => {
                 nextTargetId: s.nextTargetId + 1,
                 allCurrentTargetsInPlay: [
                     ...s.allCurrentTargetsInPlay,
-                    { id: s.nextTargetId, hexValue: a.hexValue, y: 0 },
+                    { id: s.nextTargetId, targetValue: a.targetValue, y: 0 },
                 ],
             };
         case "Restart":
             return initialState;
+
+        case "SetBase":
+            return { ...s, displayBase: a.base };
     }
 };

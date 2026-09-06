@@ -108,7 +108,7 @@ export const spawn$: Observable<Action> = new Observable(subscriber => {
         timeoutId = setTimeout(() => {
             subscriber.next({
                 kind: "SpawnTarget",
-                hexValue: Math.floor(Math.random() * 256),
+                targetValue: Math.floor(Math.random() * 256),
             });
             scheduleNext();
         }, delayMs);
@@ -118,6 +118,20 @@ export const spawn$: Observable<Action> = new Observable(subscriber => {
 
     return () => clearTimeout(timeoutId);
 });
+
+/**
+ * Emits a SetBase action whenever the player moves the base slider.
+ */
+export const baseSlider$: Observable<Action> = fromEvent<Event>(
+    document.querySelector("#baseSlider") as HTMLInputElement,
+    "input",
+).pipe(
+    map((event): Action => {
+        const base = Number((event.target as HTMLInputElement).value);
+        console.log("baseSlider$ fired:", base);
+        return { kind: "SetBase", base };
+    }),
+);
 
 /**
  * The single merged action stream that main.ts subscribes state
@@ -130,6 +144,7 @@ export const action$: Observable<Action> = merge(
     flipClick$,
     restartClick$,
     restartKey$,
+    baseSlider$,
     tick$,
     spawn$,
 );
