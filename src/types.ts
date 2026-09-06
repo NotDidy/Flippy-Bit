@@ -69,4 +69,8 @@ export type SpawnTarget = Readonly<{
     hexValue: number;
 }>;
 
-export type Action = FlipDigit | Tick | SpawnTarget;
+export type Restart = Readonly<{
+    kind: "Restart";
+}>;
+
+export type Action = FlipDigit | Tick | SpawnTarget | Restart;

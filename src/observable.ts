@@ -19,6 +19,14 @@ export const flipKey$: Observable<Action> = fromEvent<KeyboardEvent>(
     ),
 );
 
+export const restartKey$: Observable<Action> = fromEvent<KeyboardEvent>(
+    document,
+    "keydown",
+).pipe(
+    filter(event => event.key.toLowerCase() === "r"),
+    map((): Action => ({ kind: "Restart" })),
+);
+
 /**
  * Emits a FlipDigit action whenever the player clicks a digit element
  * on screen.
@@ -40,6 +48,20 @@ export const flipClick$: Observable<Action> = fromEvent<MouseEvent>(
             ),
         }),
     ),
+);
+
+export const restartClick$: Observable<Action> = fromEvent<MouseEvent>(
+    document.querySelector("#svgCanvas") as SVGSVGElement,
+    "click",
+).pipe(
+    filter(event => {
+        const hit = (event.target as SVGElement).hasAttribute(
+            "data-fb-restart-button",
+        );
+        console.log("restart click filter:", event.target, hit);
+        return hit;
+    }),
+    map((): Action => ({ kind: "Restart" })),
 );
 
 /**
@@ -83,6 +105,8 @@ export const spawn$: Observable<Action> = new Observable(subscriber => {
 export const action$: Observable<Action> = merge(
     flipKey$,
     flipClick$,
+    restartClick$,
+    restartKey$,
     tick$,
     spawn$,
 );

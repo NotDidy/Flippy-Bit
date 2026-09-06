@@ -118,7 +118,14 @@ svg rect {
     font-family: monospace;
 }
 
+
+
 .game-over-title,
-.game-over-score {
+.game-over-score,
+.game-over-restart {
+    fill: white;
+}
+
+.game-over-restart {
     fill: white;
 }

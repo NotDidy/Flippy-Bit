@@ -42,6 +42,10 @@ export const reduceState = (s: State, a: Action): State => {
         case "FlipDigit":
             return { ...s, digitBank: flipDigit(s.digitBank, a.index) };
         case "Tick": {
+            if (s.gameEnd) {
+                return s; // ignore all further actions once the game has ended
+            }
+
             const movedTargets = moveTargetsDown(s.allCurrentTargetsInPlay);
 
             // "Lowest" = furthest down = largest y, regardless of array order.
@@ -79,6 +83,9 @@ export const reduceState = (s: State, a: Action): State => {
             return { ...s, gameEnd: true };
         }
         case "SpawnTarget":
+            if (s.gameEnd) {
+                return s; // ignore all further actions once the game has ended
+            }
             return {
                 ...s,
                 nextTargetId: s.nextTargetId + 1,
@@ -87,5 +94,7 @@ export const reduceState = (s: State, a: Action): State => {
                     { id: s.nextTargetId, hexValue: a.hexValue, y: 0 },
                 ],
             };
+        case "Restart":
+            return initialState;
     }
 };

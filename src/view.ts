@@ -229,11 +229,23 @@ const renderGameOver = (svg: SVGSVGElement, s: State): void => {
         "dominant-baseline": "central",
         class: "game-over-score",
     });
-    scoreText.textContent = `Final Score: ${s.score}`;
+
+    const restartText = createSvgElement(svg.namespaceURI, "text", {
+        x: String(Viewport.CANVAS_WIDTH / 2),
+        y: String(Viewport.CANVAS_HEIGHT / 2 + 48),
+        "text-anchor": "middle",
+        "dominant-baseline": "central",
+        "data-fb-restart-button": "true",
+        class: "game-over-restart",
+    });
+
+    restartText.textContent = "Click to Restart";
 
     group.appendChild(background);
     group.appendChild(titleText);
+    scoreText.textContent = `Final Score: ${s.score}`;
     group.appendChild(scoreText);
+    group.appendChild(restartText);
     svg.appendChild(group);
 };
 
