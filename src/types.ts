@@ -34,7 +34,7 @@ export const ElementIds = {
 export type Bit = 0 | 1;
 
 export type DigitBank = Readonly<{
-    bits: ReadonlyArray<Bit>; // 
+    bits: ReadonlyArray<Bit>; //
 }>;
 
 export type FallingTargetView = Readonly<{
@@ -43,15 +43,14 @@ export type FallingTargetView = Readonly<{
     y: number;
 }>;
 
-
 export type State = Readonly<{
     digitBank: DigitBank;
     allCurrentTargetsInPlay: ReadonlyArray<FallingTargetView>;
     healthReserve: number;
     score: number;
     gameEnd: boolean;
+    nextTargetId: number;
 }>;
-
 
 export type FlipDigit = Readonly<{
     kind: "FlipDigit";
