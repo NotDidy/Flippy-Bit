@@ -190,6 +190,53 @@ const renderScore = (svg: SVGSVGElement, s: State): void => {
     svg.appendChild(group);
 };
 
+const renderGameOver = (svg: SVGSVGElement, s: State): void => {
+    const existingGroup = svg.querySelector(`#${ElementIds.GAME_OVER_GROUP}`);
+    if (existingGroup) {
+        svg.removeChild(existingGroup);
+    }
+    if (!s.gameEnd) {
+        return; // nothing to show — but note we still clear any stale
+        // group above, in case gameEnd somehow flips back to
+        // false later (e.g. after restart is implemented)
+    }
+
+    const group = createSvgElement(svg.namespaceURI, "g", {
+        id: ElementIds.GAME_OVER_GROUP,
+    });
+
+    const background = createSvgElement(svg.namespaceURI, "rect", {
+        x: "0",
+        y: "0",
+        width: String(Viewport.CANVAS_WIDTH),
+        height: String(Viewport.CANVAS_HEIGHT),
+        class: "game-over-background",
+    });
+
+    const titleText = createSvgElement(svg.namespaceURI, "text", {
+        x: String(Viewport.CANVAS_WIDTH / 2),
+        y: String(Viewport.CANVAS_HEIGHT / 2 - 16),
+        "text-anchor": "middle",
+        "dominant-baseline": "central",
+        class: "game-over-title",
+    });
+    titleText.textContent = "Game Over";
+
+    const scoreText = createSvgElement(svg.namespaceURI, "text", {
+        x: String(Viewport.CANVAS_WIDTH / 2),
+        y: String(Viewport.CANVAS_HEIGHT / 2 + 16),
+        "text-anchor": "middle",
+        "dominant-baseline": "central",
+        class: "game-over-score",
+    });
+    scoreText.textContent = `Final Score: ${s.score}`;
+
+    group.appendChild(background);
+    group.appendChild(titleText);
+    group.appendChild(scoreText);
+    svg.appendChild(group);
+};
+
 /**
  * Sets up the SVG canvas and returns the render function used to draw
  * each new State as it arrives from the state stream.
@@ -212,10 +259,11 @@ export const render = (): ((s: State) => void) => {
      * @param s Current state
      */
     return (s: State) => {
-        // TODO: clear/update previous frame's elements as appropriate,
-        // then call renderDigitBank, renderTargets, etc.
-        renderDigitBank(svg, s);
-        renderTargets(svg, s);
-        renderScore(svg, s);
+        if (!s.gameEnd) {
+            renderDigitBank(svg, s);
+            renderTargets(svg, s);
+            renderScore(svg, s);
+        }
+        renderGameOver(svg, s);
     };
 };

@@ -117,3 +117,8 @@ svg rect {
     fill: var(--fb-target-text-color);
     font-family: monospace;
 }
+
+.game-over-title,
+.game-over-score {
+    fill: white;
+}
