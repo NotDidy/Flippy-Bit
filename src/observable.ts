@@ -35,9 +35,10 @@ export const flipClick$: Observable<Action> = fromEvent<MouseEvent>(
     document.querySelector("#svgCanvas") as SVGSVGElement,
     "click",
 ).pipe(
-    filter(event =>
-        (event.target as SVGElement).hasAttribute("data-fb-digit-index"),
-    ),
+    filter(event => {
+        console.log("click target:", event.target); // temporary
+        return (event.target as SVGElement).hasAttribute("data-fb-digit-index");
+    }),
     map(
         (event): Action => ({
             kind: "FlipDigit",

@@ -5,7 +5,14 @@
  * decide game logic — it should only take a State and draw it.
  */
 
-import { Constants, State, Target, Viewport, ElementIds } from "./types";
+import {
+    Constants,
+    State,
+    Target,
+    Viewport,
+    ElementIds,
+    DigitBank,
+} from "./types";
 
 /**
  * Brings an SVG element to the foreground.
@@ -168,26 +175,11 @@ const renderTargets = (svg: SVGSVGElement, s: State): void => {
  * renderScore, renderHealthReserve, renderGameOverOverlay.
  */
 
-const renderScore = (svg: SVGSVGElement, s: State): void => {
-    const existingGroup = svg.querySelector(`#${ElementIds.SCORE_GROUP}`);
-    if (existingGroup) {
-        svg.removeChild(existingGroup);
+const renderScore = (s: State): void => {
+    const scoreText = document.querySelector("#scoreText");
+    if (scoreText) {
+        scoreText.textContent = String(s.score);
     }
-
-    const group = createSvgElement(svg.namespaceURI, "g", {
-        id: ElementIds.SCORE_GROUP,
-    });
-
-    const scoreText = createSvgElement(svg.namespaceURI, "text", {
-        x: "16",
-        y: "24",
-        "text-anchor": "start",
-        class: "score-text",
-    });
-    scoreText.textContent = `Score: ${s.score}`;
-
-    group.appendChild(scoreText);
-    svg.appendChild(group);
 };
 
 const renderGameOver = (svg: SVGSVGElement, s: State): void => {
@@ -258,24 +250,26 @@ const renderGameOver = (svg: SVGSVGElement, s: State): void => {
  */
 export const render = (): ((s: State) => void) => {
     const svg = document.querySelector("#svgCanvas") as SVGSVGElement;
-
     svg.setAttribute(
         "viewBox",
         `0 0 ${Viewport.CANVAS_WIDTH} ${Viewport.CANVAS_HEIGHT}`,
     );
 
-    /**
-     * Renders the current state to the canvas.
-     *
-     * In MVC terms, this updates the View using the Model.
-     *
-     * @param s Current state
-     */
+    // Tracks the last-rendered value of each piece of state we care
+    // about, so we only touch the DOM when something actually changed —
+    // this matters once ticks fire much faster than the player can
+    // perceive per-field changes (e.g. digitBank only changes on
+    // FlipDigit, not on every Tick).
+    let lastDigitBank: DigitBank | null = null;
+
     return (s: State) => {
-        if (!s.gameEnd) {
+        if (s.digitBank !== lastDigitBank) {
             renderDigitBank(svg, s);
+            lastDigitBank = s.digitBank;
+        }
+        if (!s.gameEnd) {
             renderTargets(svg, s);
-            renderScore(svg, s);
+            renderScore(s);
         }
         renderGameOver(svg, s);
     };
