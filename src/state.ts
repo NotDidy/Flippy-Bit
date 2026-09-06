@@ -12,7 +12,7 @@ import { bitsToNumber, updateAt } from "./util";
  */
 export const initialState: State = {
     digitBank: { bits: Array.from({ length: Constants.DIGIT_COUNT }, () => 0) },
-    allCurrentTargetsInPlay: [{ id: 1, hexValue: 0xa, y: 0 }],
+    allCurrentTargetsInPlay: [],
     healthReserve: 3, //
     score: 0,
     gameEnd: false,
@@ -23,7 +23,6 @@ export const initialState: State = {
 const BASE_FALL_SPEED = 6; // px/tick at game start — matches the original hardcoded value
 const MAX_FALL_SPEED = 18; // hard cap so late-game isn't literally unplayable
 const SPEED_INCREMENT_PER_INTERVAL = 3; // px/tick gained per SPEED_INTERVAL_MS survived
-const SPEED_INTERVAL_MS = 10_000; // how often the speed bumps up
 
 /**
  * Fall speed (px/tick), increasing in steps every SPEED_INTERVAL_MS of
@@ -32,7 +31,7 @@ const SPEED_INTERVAL_MS = 10_000; // how often the speed bumps up
  * Tick actually fires.
  */
 const speedForElapsed = (elapsedMs: number): number => {
-    const stepsElapsed = Math.floor(elapsedMs / SPEED_INTERVAL_MS);
+    const stepsElapsed = Math.floor(elapsedMs / Constants.SPEED_INTERVAL_MS);
     const rawSpeed =
         BASE_FALL_SPEED + stepsElapsed * SPEED_INCREMENT_PER_INTERVAL;
     return Math.min(rawSpeed, MAX_FALL_SPEED);

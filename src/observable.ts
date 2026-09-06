@@ -72,20 +72,42 @@ export const tick$: Observable<Action> = interval(Constants.TICK_RATE_MS).pipe(
     map((elapsed): Action => ({ kind: "Tick", elapsedMs: elapsed })),
 );
 
+const BASE_MIN_DELAY_MS = 1000;
+const BASE_MAX_DELAY_MS = 3000;
+const DELAY_WIDENING_PER_INTERVAL = 200; // ms added to both bounds per Constants.SPEED_INTERVAL_MS survived
+const MAX_MIN_DELAY_MS = 2500; // cap so spawns never become absurdly rare late-game
+
+const delayRangeForElapsed = (
+    elapsedMs: number,
+): { min: number; max: number } => {
+    const stepsElapsed = Math.floor(elapsedMs / Constants.SPEED_INTERVAL_MS);
+    const widening = stepsElapsed * DELAY_WIDENING_PER_INTERVAL;
+    return {
+        min: Math.min(BASE_MIN_DELAY_MS + widening, MAX_MIN_DELAY_MS),
+        max: Math.min(
+            BASE_MAX_DELAY_MS + widening,
+            MAX_MIN_DELAY_MS + (BASE_MAX_DELAY_MS - BASE_MIN_DELAY_MS),
+        ),
+    };
+};
+
 /**
  * Emits a SpawnTarget action at a random interval between 1-3 seconds, each with a fresh id and random hex value.
  *
  */
 export const spawn$: Observable<Action> = new Observable(subscriber => {
+    const startTime = Date.now(); // fixed once, at subscribe-time — the clock spawn$ measures itself against
     let timeoutId: ReturnType<typeof setTimeout>;
 
     const scheduleNext = () => {
-        const delayMs = 1000 + Math.random() * 2000; // random delay in [1000, 3000)
+        const elapsedMs = Date.now() - startTime;
+        const { min, max } = delayRangeForElapsed(elapsedMs);
+        const delayMs = min + Math.random() * (max - min);
 
         timeoutId = setTimeout(() => {
             subscriber.next({
                 kind: "SpawnTarget",
-                hexValue: Math.floor(Math.random() * 256), // 0–255, matches an 8-bit digit bank
+                hexValue: Math.floor(Math.random() * 256),
             });
             scheduleNext();
         }, delayMs);
