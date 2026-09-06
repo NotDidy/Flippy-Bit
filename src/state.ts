@@ -20,9 +20,9 @@ export const initialState: State = {
     elapsedMs: 0,
 };
 
-const BASE_FALL_SPEED = 6; // px/tick at game start — matches the original hardcoded value
-const MAX_FALL_SPEED = 18; // hard cap so late-game isn't literally unplayable
-const SPEED_INCREMENT_PER_INTERVAL = 3; // px/tick gained per SPEED_INTERVAL_MS survived
+const BASE_FALL_SPEED = 0.5; // px/tick at game start — matches the original hardcoded value
+const MAX_FALL_SPEED = 8; // hard cap so late-game isn't literally unplayable
+const SPEED_INCREMENT_PER_INTERVAL = 0.5; // px/tick gained per SPEED_INTERVAL_MS survived
 
 /**
  * Fall speed (px/tick), increasing in steps every SPEED_INTERVAL_MS of

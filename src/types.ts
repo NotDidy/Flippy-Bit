@@ -18,8 +18,8 @@ export const Target = {
 
 export const Constants = {
     DIGIT_COUNT: 8,
-    TICK_RATE_MS: 500,
-    SPEED_INTERVAL_MS: 10_000,
+    TICK_RATE_MS: 50,
+    SPEED_INTERVAL_MS: 50_000,
 } as const;
 
 export const ElementIds = {

@@ -192,13 +192,15 @@ const renderScore = (svg: SVGSVGElement, s: State): void => {
 
 const renderGameOver = (svg: SVGSVGElement, s: State): void => {
     const existingGroup = svg.querySelector(`#${ElementIds.GAME_OVER_GROUP}`);
-    if (existingGroup) {
-        svg.removeChild(existingGroup);
-    }
     if (!s.gameEnd) {
-        return; // nothing to show — but note we still clear any stale
-        // group above, in case gameEnd somehow flips back to
-        // false later (e.g. after restart is implemented)
+        if (existingGroup) {
+            svg.removeChild(existingGroup);
+        }
+        return;
+    }
+
+    if (existingGroup) {
+        return; // already showing game-over — don't rebuild every tick and risk swallowing clicks
     }
 
     const group = createSvgElement(svg.namespaceURI, "g", {
@@ -229,6 +231,7 @@ const renderGameOver = (svg: SVGSVGElement, s: State): void => {
         "dominant-baseline": "central",
         class: "game-over-score",
     });
+    scoreText.textContent = `Final Score: ${s.score}`;
 
     const restartText = createSvgElement(svg.namespaceURI, "text", {
         x: String(Viewport.CANVAS_WIDTH / 2),
@@ -238,12 +241,10 @@ const renderGameOver = (svg: SVGSVGElement, s: State): void => {
         "data-fb-restart-button": "true",
         class: "game-over-restart",
     });
-
     restartText.textContent = "Click to Restart";
 
     group.appendChild(background);
     group.appendChild(titleText);
-    scoreText.textContent = `Final Score: ${s.score}`;
     group.appendChild(scoreText);
     group.appendChild(restartText);
     svg.appendChild(group);

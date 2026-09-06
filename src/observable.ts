@@ -72,10 +72,10 @@ export const tick$: Observable<Action> = interval(Constants.TICK_RATE_MS).pipe(
     map((elapsed): Action => ({ kind: "Tick", elapsedMs: elapsed })),
 );
 
-const BASE_MIN_DELAY_MS = 1000;
-const BASE_MAX_DELAY_MS = 3000;
-const DELAY_WIDENING_PER_INTERVAL = 200; // ms added to both bounds per Constants.SPEED_INTERVAL_MS survived
-const MAX_MIN_DELAY_MS = 2500; // cap so spawns never become absurdly rare late-game
+const BASE_MIN_DELAY_MS = 2000;
+const BASE_MAX_DELAY_MS = 5000;
+const DELAY_WIDENING_PER_INTERVAL = 500; // ms added to both bounds per Constants.SPEED_INTERVAL_MS survived
+const MAX_MIN_DELAY_MS = 25000; // cap so spawns never become absurdly rare late-game
 
 const delayRangeForElapsed = (
     elapsedMs: number,
