@@ -1,4 +1,13 @@
-import { Observable, fromEvent, interval, map, merge } from "rxjs";
+import {
+    Observable,
+    fromEvent,
+    interval,
+    map,
+    merge,
+    scan,
+    withLatestFrom,
+    startWith,
+} from "rxjs";
 import { filter } from "rxjs/operators";
 import { Action, Constants } from "./types";
 
@@ -76,7 +85,7 @@ export const tick$: Observable<Action> = interval(Constants.TICK_RATE_MS).pipe(
 const BASE_MIN_DELAY_MS = 2000;
 const BASE_MAX_DELAY_MS = 5000;
 const DELAY_WIDENING_PER_INTERVAL = 500; // ms added to both bounds per Constants.SPEED_INTERVAL_MS survived
-const MAX_MIN_DELAY_MS = 25000; // cap so spawns never become absurdly rare late-game
+const MAX_MIN_DELAY_MS = 25000;
 
 const delayRangeForElapsed = (
     elapsedMs: number,
@@ -97,7 +106,7 @@ const delayRangeForElapsed = (
  *
  */
 export const spawn$: Observable<Action> = new Observable(subscriber => {
-    const startTime = Date.now(); // fixed once, at subscribe-time — the clock spawn$ measures itself against
+    const startTime = Date.now();
     let timeoutId: ReturnType<typeof setTimeout>;
 
     const scheduleNext = () => {
@@ -133,11 +142,34 @@ export const baseSlider$: Observable<Action> = fromEvent<Event>(
     }),
 );
 
+const pauseKeyPress$ = fromEvent<KeyboardEvent>(document, "keydown").pipe(
+    filter(event => event.key.toLowerCase() === "p"),
+);
+
+const isPaused$: Observable<boolean> = pauseKeyPress$.pipe(
+    scan(isPaused => !isPaused, false),
+);
+
+const gatedTick$: Observable<Action> = tick$.pipe(
+    withLatestFrom(isPaused$.pipe(startWith(false))), // startWith so gatedTick$ can emit before the first "p" press
+    filter(([, isPaused]) => !isPaused),
+    map(([tickAction]) => tickAction),
+);
+
+const gatedSpawn$: Observable<Action> = spawn$.pipe(
+    withLatestFrom(isPaused$.pipe(startWith(false))),
+    filter(([, isPaused]) => !isPaused),
+    map(([spawnAction]) => spawnAction),
+);
+
+const togglePause$: Observable<Action> = pauseKeyPress$.pipe(
+    map((): Action => ({ kind: "TogglePause" })),
+);
+
 /**
  * The single merged action stream that main.ts subscribes state
  * management to via scan(reduceState, initialState).
  *
- * TODO: merge in flipClick$ once implemented.
  */
 export const action$: Observable<Action> = merge(
     flipKey$,
@@ -145,6 +177,7 @@ export const action$: Observable<Action> = merge(
     restartClick$,
     restartKey$,
     baseSlider$,
-    tick$,
-    spawn$,
+    togglePause$,
+    gatedTick$,
+    gatedSpawn$,
 );

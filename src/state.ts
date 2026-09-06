@@ -8,7 +8,7 @@ import {
 import { bitsToNumber, updateAt } from "./util";
 
 /**
- * The state the game begins in. //Make ReadOnly
+ * The state the game begins in.
  */
 export const initialState: State = {
     digitBank: { bits: Array.from({ length: Constants.DIGIT_COUNT }, () => 0) },
@@ -19,17 +19,16 @@ export const initialState: State = {
     nextTargetId: 0,
     elapsedMs: 0,
     displayBase: 16,
+    isPaused: false,
 };
 
-const BASE_FALL_SPEED = 0.5; // px/tick at game start — matches the original hardcoded value
+const BASE_FALL_SPEED = 0.5; // px/tick at game start
 const MAX_FALL_SPEED = 8; // hard cap so late-game isn't literally unplayable
 const SPEED_INCREMENT_PER_INTERVAL = 0.5; // px/tick gained per SPEED_INTERVAL_MS survived
 
 /**
  * Fall speed (px/tick), increasing in steps every SPEED_INTERVAL_MS of
- * survival, capped at MAX_FALL_SPEED. Pure function of elapsed time so
- * it's trivially testable and reusable, independent of when/how often
- * Tick actually fires.
+ * survival, capped at MAX_FALL_SPEED
  */
 const speedForElapsed = (elapsedMs: number): number => {
     const stepsElapsed = Math.floor(elapsedMs / Constants.SPEED_INTERVAL_MS);
@@ -44,7 +43,7 @@ const moveTargetsDown = (
 ): ReadonlyArray<FallingTargetView> =>
     targets.map(t => ({ ...t, y: t.y + fallSpeed }));
 
-const CHECK_LINE_Y = 300; // TODO: move to Constants in types.ts
+const CHECK_LINE_Y = 300;
 
 /**
  * Returns a new DigitBank with the bit at `index` flipped (0 -> 1, 1 -> 0).
@@ -133,5 +132,7 @@ export const reduceState = (s: State, a: Action): State => {
 
         case "SetBase":
             return { ...s, displayBase: a.base };
+        case "TogglePause":
+            return { ...s, isPaused: !s.isPaused };
     }
 };

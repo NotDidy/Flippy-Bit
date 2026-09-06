@@ -1,7 +1,6 @@
 /**
  *
- * Core domain types shared across the game. No logic lives here —
- * only type/constant declarations.
+ * Core types shared across the game.
  */
 
 export const Viewport = {
@@ -53,6 +52,7 @@ export type State = Readonly<{
     nextTargetId: number;
     elapsedMs: number;
     displayBase: number;
+    isPaused: boolean;
 }>;
 
 export type FlipDigit = Readonly<{
@@ -79,4 +79,14 @@ export type Restart = Readonly<{
     kind: "Restart";
 }>;
 
-export type Action = FlipDigit | Tick | SpawnTarget | Restart | SetBase;
+export type TogglePause = Readonly<{
+    kind: "TogglePause";
+}>;
+
+export type Action =
+    | FlipDigit
+    | Tick
+    | SpawnTarget
+    | Restart
+    | SetBase
+    | TogglePause;

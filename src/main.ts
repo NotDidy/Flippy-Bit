@@ -1,6 +1,4 @@
 /**
- * main.ts
- *
  * Wires the action stream through state reduction to rendering.
  */
 

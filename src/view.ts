@@ -1,8 +1,7 @@
 /**
  * view.ts
  *
- * All rendering (side effects) lives here. Nothing in this file should
- * decide game logic — it should only take a State and draw it.
+ * All rendering (side effects) lives here.
  */
 
 import {
@@ -61,15 +60,13 @@ export const createSvgElement = (
 };
 
 /**
- * Renders the DigitBank row. Each digit element should carry a
- * data-fb-digit-index attribute so observable.ts's click handling
- * (flipClick$) can identify which digit was clicked.
+ * Renders the DigitBank row.
  *
  */
 
 const DIGIT_BOX_SIZE = 48;
 const DIGIT_BOX_GAP = 12;
-const DIGIT_ROW_Y = Viewport.CANVAS_HEIGHT - DIGIT_BOX_SIZE - 16; // near the bottom of the canvas
+const DIGIT_ROW_Y = Viewport.CANVAS_HEIGHT - DIGIT_BOX_SIZE - 16;
 
 const DIGIT_BANK_GROUP_ID = "fb-digit-bank-group";
 
@@ -83,7 +80,6 @@ const renderDigitBank = (svg: SVGSVGElement, s: State): void => {
         id: DIGIT_BANK_GROUP_ID,
     });
 
-    // Centre the row of Constants.DIGIT_COUNT boxes horizontally on the canvas.
     const rowWidth =
         Constants.DIGIT_COUNT * DIGIT_BOX_SIZE +
         (Constants.DIGIT_COUNT - 1) * DIGIT_BOX_GAP;
@@ -124,11 +120,8 @@ type TargetElements = { box: SVGElement; text: SVGElement };
 /**
  * Renders allCurrentTargetsInPlay by diffing against what was drawn last
  * frame, rather than destroying and recreating every element each call.
- * `elementsById` is owned by the caller (render()'s closure) and mutated
- * in place, since it needs to persist across calls to know what already
- * exists in the DOM.
  */
-const TARGET_PADDING_X = 12; // horizontal breathing room between text and box edge
+const TARGET_PADDING_X = 12; // horizontal padding between text and box edge
 
 const renderTargets = (
     svg: SVGSVGElement,
@@ -157,10 +150,9 @@ const renderTargets = (
 
     const centerX = Viewport.CANVAS_WIDTH / 2;
 
-    // Sizes the box around whatever text is currently in `text`, using
-    // its real rendered width (getBBox) rather than guessing a
-    // character-width constant — this is what makes the box correctly
-    // fit "11111111" (base 2) just as well as "FF" (base 16).
+    // Sizes the box around whatever text is currently in the DOM, using
+    // its real rendered width rather than guessing a
+    // character-width constant
     const fitBoxToText = (box: SVGElement, text: SVGElement, y: number) => {
         const bbox = (text as unknown as SVGTextElement).getBBox();
         const width = Math.max(Target.WIDTH, bbox.width + TARGET_PADDING_X * 2);
@@ -206,7 +198,7 @@ const renderTargets = (
         text.textContent = displayText;
 
         group!.appendChild(box);
-        group!.appendChild(text); // must be appended before getBBox() — an unattached element has no layout to measure
+        group!.appendChild(text);
 
         fitBoxToText(box, text, y);
 
@@ -231,7 +223,7 @@ const renderGameOver = (svg: SVGSVGElement, s: State): void => {
     }
 
     if (existingGroup) {
-        return; // already showing game-over — don't rebuild every tick and risk swallowing clicks
+        return;
     }
 
     const group = createSvgElement(svg.namespaceURI, "g", {
@@ -314,9 +306,6 @@ export const render = (): ((s: State) => void) => {
             renderTargets(svg, s, targetElementsById);
             renderScore(s);
         } else if (targetElementsById.size > 0) {
-            // Game just ended — clear tracked target elements so a
-            // future Restart starts from a clean map, not stale entries
-            // pointing at now-removed-or-orphaned DOM nodes.
             const group = svg.querySelector(`#${ElementIds.TARGETS_GROUP}`);
             if (group) svg.removeChild(group);
             targetElementsById.clear();

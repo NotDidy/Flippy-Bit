@@ -69,3 +69,13 @@ src/
   view.ts        -- rendering
   observable.ts  -- functions to create Observable streams
 ```
+
+HD APPLICATIONS
+
+BASE SWITCHING
+The player can adjust the base of the targets using a slider displayed on the bottom within the sidebar from binary all the way to hexadecimal. Moving the slider updates the displayBase field in State through a SetBase action which the input is given through the baseSlider input event listener in observable.ts
+
+It re-renders the bases mid game and immediately updates in real time as the slider changes. This works because render targets re-reads the display base on every render call. The padding of the boxes also compensate for the change in bases as the lower the base, the longer the digits. The boxes dynamicall resize themselves to fit the digit length. 
+
+PAUSE BUTTON
+The player can press the key "p" to pause the game. The targets will stop moving and spawning altogether. Unpausing the game will resume the game where it left off.
